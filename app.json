@@ -30,14 +30,16 @@
       "permissions": [
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION",
-        "ACCESS_BACKGROUND_LOCATION",
-        "NFC"
+        "ACCESS_BACKGROUND_LOCATION"
       ],
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "packagerOpts": {
+      "host": "0.0.0.0"
     },
     "plugins": [
       [
@@ -57,12 +59,10 @@
           "color": "#007AFF"
         }
       ],
-      [
-        "expo-nfc",
-        {
-          "nfcPermission": "ClockIn needs NFC access to read secure check-in tags."
-        }
-      ]
-    ]
+      "expo-secure-store"
+    ],
+    "expoGo": {
+      "debuggerHost": "192.168.0.208:8081"
+    }
   }
 }

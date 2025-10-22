@@ -10,7 +10,7 @@ export interface LocationResult {
 
 export class LocationService {
   private static instance: LocationService;
-  private isLocationEnabled = false;
+  private locationEnabled = false;
 
   static getInstance(): LocationService {
     if (!LocationService.instance) {
@@ -22,7 +22,7 @@ export class LocationService {
   async requestPermissions(): Promise<boolean> {
     try {
       const { status: foregroundStatus } = await Location.requestForegroundPermissionsAsync();
-      
+
       if (foregroundStatus !== 'granted') {
         console.warn('Foreground location permission not granted');
         return false;
@@ -30,12 +30,12 @@ export class LocationService {
 
       // Request background permission for more accurate tracking
       const { status: backgroundStatus } = await Location.requestBackgroundPermissionsAsync();
-      
+
       if (backgroundStatus !== 'granted') {
         console.warn('Background location permission not granted, using foreground only');
       }
 
-      this.isLocationEnabled = true;
+      this.locationEnabled = true;
       return true;
     } catch (error) {
       console.error('Error requesting location permissions:', error);
@@ -45,7 +45,7 @@ export class LocationService {
 
   async getCurrentLocation(): Promise<LocationResult | null> {
     try {
-      if (!this.isLocationEnabled) {
+      if (!this.locationEnabled) {
         const hasPermission = await this.requestPermissions();
         if (!hasPermission) {
           throw new Error('Location permission not granted');
@@ -54,8 +54,7 @@ export class LocationService {
 
       const location = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.High,
-        maximumAge: 10000, // 10 seconds
-        timeout: 15000, // 15 seconds
+        timeInterval: 10000, // 10 seconds
       });
 
       const result: LocationResult = {
@@ -132,7 +131,7 @@ export class LocationService {
   }> {
     try {
       const location = await this.getCurrentLocation();
-      
+
       if (!location) {
         return {
           isValid: false,
@@ -170,6 +169,6 @@ export class LocationService {
   }
 
   isLocationEnabled(): boolean {
-    return this.isLocationEnabled;
+    return this.locationEnabled;
   }
 }

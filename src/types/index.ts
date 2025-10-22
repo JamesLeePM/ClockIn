@@ -5,6 +5,7 @@ export interface Employee {
     companyId: string;
     position?: string;
     department?: string;
+    email?: string;
 }
 
 export interface TimeEntry {
@@ -20,6 +21,8 @@ export interface TimeEntry {
     };
     notes?: string;
     synced: boolean;
+    method?: string;
+    isSynced?: boolean;
 }
 
 export interface Company {
@@ -35,6 +38,9 @@ export interface Company {
         requireLocation: boolean;
         allowOffline: boolean;
         maxDistance: number; // in meters
+        allowNFC?: boolean;
+        allowQR?: boolean;
+        allowManual?: boolean;
     };
 }
 

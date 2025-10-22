@@ -1,7 +1,7 @@
-import { TimeEntry, Employee, Company } from '../types';
-import { StorageService } from './StorageService';
-import { LocationService } from './LocationService';
 import * as Notifications from 'expo-notifications';
+import { Company, Employee, TimeEntry } from '../types';
+import { LocationService } from './LocationService';
+import { StorageService } from './StorageService';
 
 export class TimeTrackingService {
   private static instance: TimeTrackingService;
@@ -27,7 +27,7 @@ export class TimeTrackingService {
       // Validate location if required
       if (company.settings.requireLocation) {
         const locationValidation = await this.locationService.validateLocationForCheckIn(company);
-        
+
         if (!locationValidation.isValid) {
           return {
             success: false,
@@ -37,9 +37,15 @@ export class TimeTrackingService {
       }
 
       // Get current location
-      const location = company.settings.requireLocation 
+      const locationResult = company.settings.requireLocation
         ? await this.locationService.getCurrentLocation()
-        : undefined;
+        : null;
+
+      const location = locationResult ? {
+        latitude: locationResult.latitude,
+        longitude: locationResult.longitude,
+        address: locationResult.address
+      } : undefined;
 
       // Create time entry
       const timeEntry: TimeEntry = {
@@ -51,6 +57,8 @@ export class TimeTrackingService {
         location,
         notes,
         synced: false,
+        method: 'Manual',
+        isSynced: false,
       };
 
       // Save to storage
@@ -80,9 +88,15 @@ export class TimeTrackingService {
   }> {
     try {
       // Get current location if required
-      const location = company.settings.requireLocation 
+      const locationResult = company.settings.requireLocation
         ? await this.locationService.getCurrentLocation()
-        : undefined;
+        : null;
+
+      const location = locationResult ? {
+        latitude: locationResult.latitude,
+        longitude: locationResult.longitude,
+        address: locationResult.address
+      } : undefined;
 
       // Create time entry
       const timeEntry: TimeEntry = {
@@ -94,6 +108,8 @@ export class TimeTrackingService {
         location,
         notes,
         synced: false,
+        method: 'Manual',
+        isSynced: false,
       };
 
       // Save to storage
@@ -133,7 +149,7 @@ export class TimeTrackingService {
       const checkIns = entries
         .filter(entry => entry.employeeId === employeeId && entry.type === 'checkin')
         .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-      
+
       return checkIns.length > 0 ? checkIns[0] : null;
     } catch (error) {
       console.error('Error getting last check in:', error);
@@ -148,8 +164,8 @@ export class TimeTrackingService {
 
       const entries = await StorageService.getTimeEntries();
       const checkOuts = entries
-        .filter(entry => 
-          entry.employeeId === employeeId && 
+        .filter(entry =>
+          entry.employeeId === employeeId &&
           entry.type === 'checkout' &&
           new Date(entry.timestamp) > new Date(lastCheckIn.timestamp)
         )
